@@ -31,19 +31,19 @@ partial class QTIParser : IEnumerable{
                 //responses.Add(key, content.ToArray());    
             }
             //Console.WriteLine(reader.Name);
-            if(reader.Name == "assessmentItem"){
+            //if(reader.Name == "assessmentItem"){
                 
                 while(reader.Name == "p" || reader.NodeType == XmlNodeType.Text){
                     reader.Read();
                     if(reader.NodeType == XmlNodeType.Text) result.AddText(reader.Value); 
                 }
-            } // ???
+           // } // ???
                 if(reader.Name == "choiceInteraction"){
                     bool isMC = true;
                     List<string> answers = new List<string>();
                     List<bool> answerKey = new List<bool>();
                     for(int i=0;i<reader.AttributeCount;i++){
-                        if(reader.GetAttribute(i) == "maxChoices=\"1\"") isMC = false;
+                        if(reader.GetAttribute(i) == "maxChoices=\"1\"") isMC = false; //is never true, not working!
                     }
 
                     while(!(reader.NodeType == XmlNodeType.EndElement && reader.Name == "choiceInteraction")){
