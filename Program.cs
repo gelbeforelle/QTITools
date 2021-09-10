@@ -10,8 +10,9 @@ namespace QTITools
     {
         static void Main(string[] args)
         {
-            var file = new QTIParser("C:/Users/Niclas/Documents/QTI/test.zip");
+            var file = new QTIParser("C:/Users/Niclas/Documents/QTI/test2.zip");
             foreach(ZipArchiveEntry entry in file){ 
+                var test = file.ReadEntry(entry);
                 if(file.ReadEntry(entry).Tasks != null) foreach(ITask t in file.ReadEntry(entry).Tasks){
                    if(entry != null) Console.WriteLine(t.ToLia());
                    else Console.WriteLine("NullEntry");

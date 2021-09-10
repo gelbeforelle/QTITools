@@ -11,21 +11,27 @@ partial class QTIParser : IEnumerable{
         // ZipArchiveEntry entry = Source.GetEntry(bodyPath);
     }
 
+    public QTIParser(Stream stream)
+    {
+        Source = new ZipArchive(stream);
+    }
+
     public TaskFile ReadEntry(ZipArchiveEntry entry){
         //if(path == blacklist) return null;
         //ZipArchiveEntry entry = Source.GetEntry(path);
         var result = new TaskFile();
         reader = XmlReader.Create(entry.Open());
         var corrects = new List<string>();
+        //var cardinalDict = new Dictionary<string, bool>();
         //var responses = new Dictionary<string, string[]>();
-        while(!(reader.NodeType == XmlNodeType.EndElement) || reader.Name == "p" || reader.Name == "simpleChoice"){
+        while (!(reader.NodeType == XmlNodeType.EndElement && (reader.Name=="assessmentItem" || reader.Name == "assessmentTest" || reader.Name == "manifest"))){
             reader.Read();
             if(reader.Name == "responseDeclaration" && reader.NodeType == XmlNodeType.Element){
                 //var key = reader.GetAttribute(0); //Should use pattern-maching!!!
                 
                 while(!(reader.Name == "responseDeclaration" && reader.NodeType == XmlNodeType.EndElement || reader.Name == "itemBody")){
                     reader.Read();
-                    if(reader.NodeType == XmlNodeType.Text) corrects.Add("identifier=\""+reader.Value+"\"");
+                    if(reader.NodeType == XmlNodeType.Text) corrects.Add(reader.Value);
                 }
                 
                 //responses.Add(key, content.ToArray());    
@@ -43,15 +49,22 @@ partial class QTIParser : IEnumerable{
                     List<string> answers = new List<string>();
                     List<bool> answerKey = new List<bool>();
                     for(int i=0;i<reader.AttributeCount;i++){
-                        if(reader.GetAttribute(i) == "maxChoices=\"1\"") isMC = false; //is never true, not working!
+                        if(reader.GetAttribute(i) == "1") isMC = false; //fixed haha
+                        //Console.WriteLine(reader.GetAttribute(i));
                     }
 
                     while(!(reader.NodeType == XmlNodeType.EndElement && reader.Name == "choiceInteraction")){
                         string choice = string.Empty;
                         while(!(reader.NodeType == XmlNodeType.EndElement && reader.Name == "simpleChoice")){
                             if(reader.Name == "simpleChoice"){
-                                if(corrects.Contains(reader.GetAttribute(0))) answerKey.Add(true);
+                                for(int i=0;i<reader.AttributeCount;i++)
+                                {
+                                    if(corrects.Contains(reader.GetAttribute(i))){ 
+                                    answerKey.Add(true);
+                                    Console.WriteLine("TrueAnswer!!! ");
+                                    }
                                     else answerKey.Add(false);
+                                    }
                             }
                             reader.Read();
                             if(reader.NodeType == XmlNodeType.Text) choice += reader.Value + "\n";
